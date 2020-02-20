@@ -1,44 +1,44 @@
 [submodule "cfe"]
 	path = cfe
-	url = https://github.com/nasa/cFE.git
-	branch = master
+	url = https://github.com/METECS/cFE.git
+	branch = metecs_bootcamp
 [submodule "osal"]
 	path = osal
-	url = https://github.com/nasa/osal.git
-	branch = master
+	url = https://github.com/METECS/osal.git
+	branch = metecs_bootcamp
 [submodule "psp"]
 	path = psp
-	url = https://github.com/nasa/PSP.git
-        branch = master
+	url = https://github.com/METECS/PSP.git
+        branch = metecs_bootcamp
 [submodule "apps/ci_lab"]
 	path = apps/ci_lab
-	url = https://github.com/nasa/ci_lab.git
-        branch = master
+	url = https://github.com/METECS/ci_lab.git
+        branch = metecs_bootcamp
 [submodule "apps/sample_app"]
 	path = apps/sample_app
-	url = https://github.com/nasa/sample_app.git
-        branch = master
+	url = https://github.com/METECS/sample_app.git
+        branch = metecs_bootcamp
 [submodule "apps/sample_lib"]
 	path = apps/sample_lib
-	url = https://github.com/nasa/sample_lib.git
-        branch = master
+	url = https://github.com/METECS/sample_lib.git
+        branch = metecs_bootcamp
 [submodule "apps/sch_lab"]
 	path = apps/sch_lab
-	url = https://github.com/nasa/sch_lab.git
-        branch = master
+	url = https://github.com/METECS/sch_lab.git
+        branch = metecs_bootcamp
 [submodule "apps/to_lab"]
 	path = apps/to_lab
-	url = https://github.com/nasa/to_lab.git
-        branch = master
+	url = https://github.com/METECS/to_lab.git
+        branch = metecs_bootcamp
 [submodule "tools/cFS-GroundSystem"]
 	path = tools/cFS-GroundSystem
-	url = https://github.com/nasa/cFS-GroundSystem.git
-        branch = master
+	url = https://github.com/METECS/cFS-GroundSystem.git
+        branch = metecs_bootcamp
 [submodule "tools/elf2cfetbl"]
 	path = tools/elf2cfetbl
-	url = https://github.com/nasa/elf2cfetbl.git
-        branch = master
+	url = https://github.com/METECS/elf2cfetbl.git
+        branch = metecs_bootcamp
 [submodule "tools/tblCRCTool"]
 	path = tools/tblCRCTool
-	url = https://github.com/nasa/tblCRCTool.git
-        branch = master
+	url = https://github.com/METECS/tblCRCTool.git
+        branch = metecs_bootcamp
