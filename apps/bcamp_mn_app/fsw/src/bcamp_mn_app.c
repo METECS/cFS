@@ -311,7 +311,11 @@ void BCAMP_MN_ReportHousekeeping( const CCSDS_CommandPacket_t *Msg )
         /*
          * Create and use a temporary structure to ensure type alignment
          */
-        CFE_SB_Msg_t tempMessage;
+        union {
+           CFE_SB_Msg_t attr1;
+           bcamp_mn_hk_tlm_t attr2;
+        } tempMessage;
+
 	memcpy(&tempMessage, &Bcamp_MN_AppData.BCAMP_MN_HkTelemetryPkt, sizeof(tempMessage));
 
         CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &tempMessage);
