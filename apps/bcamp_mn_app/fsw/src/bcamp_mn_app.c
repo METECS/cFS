@@ -5,6 +5,8 @@
 #include "bcamp_mn_app_version.h"
 #include "bcamp_mn_app.h"
 
+#include "bcamp_io_app_msgids.h"
+
 #include <string.h>
 
 /*
@@ -94,6 +96,16 @@ int32 BCAMP_MN_AppInit( void )
 {
     int32    status;
 
+    /*
+    ** Initialize the temperature state variables
+    */
+    Bcamp_MN_AppData.iTempVal     = 0;
+    Bcamp_MN_AppData.iPrevTempVal = 0;
+    Bcamp_MN_AppData.iColdLimit   = 45;
+    Bcamp_MN_AppData.iHotLimit    = 85;
+    Bcamp_MN_AppData.sDirection   = TEMP_NOCHANGE;
+    Bcamp_MN_AppData.sRange       = TEMP_NOMINAL; 
+
     Bcamp_MN_AppData.RunStatus = CFE_ES_APP_RUN;
 
     /*
@@ -126,6 +138,12 @@ int32 BCAMP_MN_AppInit( void )
     Bcamp_MN_AppData.BCAMP_MN_EventFilters[5].Mask    = 0x0000;
     Bcamp_MN_AppData.BCAMP_MN_EventFilters[6].EventID = BCAMP_MN_PIPE_ERR_EID;
     Bcamp_MN_AppData.BCAMP_MN_EventFilters[6].Mask    = 0x0000;
+    Bcamp_MN_AppData.BCAMP_MN_EventFilters[7].EventID = BCAMP_MN_COMMANDSETCOLDLIMIT_INF_EID;
+    Bcamp_MN_AppData.BCAMP_MN_EventFilters[7].Mask    = 0x0000;
+    Bcamp_MN_AppData.BCAMP_MN_EventFilters[8].EventID = BCAMP_MN_COMMANDSETHOTLIMIT_INF_EID;
+    Bcamp_MN_AppData.BCAMP_MN_EventFilters[8].Mask    = 0x0000;
+    Bcamp_MN_AppData.BCAMP_MN_EventFilters[9].EventID = BCAMP_MN_PROCESS_TEMP_DATA_INF_EID;
+    Bcamp_MN_AppData.BCAMP_MN_EventFilters[9].Mask    = 0x0000;
 
     /*
     ** Register the events
@@ -186,6 +204,19 @@ int32 BCAMP_MN_AppInit( void )
         return ( status );
     }
 
+    /*
+    ** Subscribe to bootcamp IO packets
+    */
+    status = CFE_SB_Subscribe(BCAMP_IO_APP_TEMP_DATA_MID,
+                              Bcamp_MN_AppData.BCAMP_MN_CommandPipe);
+    if (status != CFE_SUCCESS )
+    {
+        CFE_ES_WriteToSysLog("Bcamp_MN App: Error Subscribing to Bootcamp IO, RC = 0x%08lX\n",
+                             (unsigned long)status);
+
+        return ( status );
+    }
+
     CFE_EVS_SendEvent (BCAMP_MN_STARTUP_INF_EID,
                        CFE_EVS_INFORMATION,
                        "BCAMP_MN App Initialized. Version %d.%d.%d.%d",
@@ -220,6 +251,10 @@ void BCAMP_MN_ProcessCommandPacket( CFE_SB_MsgPtr_t Msg )
 
         case BCAMP_MN_APP_SEND_HK_MID:
             BCAMP_MN_ReportHousekeeping((CCSDS_CommandPacket_t *)Msg);
+            break;
+
+        case BCAMP_IO_APP_TEMP_DATA_MID:
+            BCAMP_MN_ProcessTemperatureData((bcamp_io_temp_data_t *)Msg);
             break;
 
         default:
@@ -274,6 +309,23 @@ void BCAMP_MN_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
 
             break;
 
+        case BCAMP_MN_APP_SET_COLD_LIMIT_CC:
+            if (BCAMP_MN_VerifyCmdLength(Msg, sizeof(BCAMP_MN_SetColdLimit_t)))
+            {
+                BCAMP_MN_SetColdLimitCC((BCAMP_MN_SetColdLimit_t *)Msg);
+            }
+
+            break;
+
+        case BCAMP_MN_APP_SET_HOT_LIMIT_CC:
+            if (BCAMP_MN_VerifyCmdLength(Msg, sizeof(BCAMP_MN_SetHotLimit_t)))
+            {
+                BCAMP_MN_SetHotLimitCC((BCAMP_MN_SetHotLimit_t *)Msg);
+            }
+
+            break;
+
+
         /* default case already found during FC vs length test */
         default:
             CFE_EVS_SendEvent(BCAMP_MN_COMMAND_ERR_EID,
@@ -303,6 +355,9 @@ void BCAMP_MN_ReportHousekeeping( const CCSDS_CommandPacket_t *Msg )
     */
     Bcamp_MN_AppData.BCAMP_MN_HkTelemetryPkt.bcamp_mn_command_error_count = Bcamp_MN_AppData.ErrCounter;
     Bcamp_MN_AppData.BCAMP_MN_HkTelemetryPkt.bcamp_mn_command_count = Bcamp_MN_AppData.CmdCounter;
+    Bcamp_MN_AppData.BCAMP_MN_HkTelemetryPkt.iTempValue = Bcamp_MN_AppData.iTempVal;
+    Bcamp_MN_AppData.BCAMP_MN_HkTelemetryPkt.sTempDirection = Bcamp_MN_AppData.sDirection;
+    Bcamp_MN_AppData.BCAMP_MN_HkTelemetryPkt.sTempRange = Bcamp_MN_AppData.sRange; 
 
     /*
     ** Send housekeeping telemetry packet...
@@ -390,6 +445,89 @@ void  BCAMP_MN_ProcessCC( const BCAMP_MN_Process_t *Msg )
 
 } /* End of BCAMP_MN_ProcessCC */
 
+void BCAMP_MN_SetColdLimitCC( const BCAMP_MN_SetColdLimit_t *Msg)
+{
+
+   Bcamp_MN_AppData.iColdLimit = Msg->iValue;
+   Bcamp_MN_AppData.CmdCounter++;
+
+   CFE_EVS_SendEvent(BCAMP_MN_COMMANDSETCOLDLIMIT_INF_EID, CFE_EVS_INFORMATION,
+                     "BCAMP_MN - Recvd SET_COLD_LIMIT cmd (%d) - %d",
+                     (int)CFE_SB_GetCmdCode((CFE_SB_MsgPtr_t)Msg), (int)Bcamp_MN_AppData.iColdLimit);
+
+   return;
+
+} /* End of BCAMP_MN_SetHotLimitCC() */
+
+void BCAMP_MN_SetHotLimitCC( const BCAMP_MN_SetHotLimit_t *Msg)
+{
+
+   Bcamp_MN_AppData.iHotLimit = Msg->iValue;
+   Bcamp_MN_AppData.CmdCounter++;
+
+   CFE_EVS_SendEvent(BCAMP_MN_COMMANDSETHOTLIMIT_INF_EID, CFE_EVS_INFORMATION,
+                     "BCAMP_MN - Recvd SET_HOT_LIMIT cmd (%d) - %d",
+                     (int)CFE_SB_GetCmdCode((CFE_SB_MsgPtr_t)Msg), (int)Bcamp_MN_AppData.iHotLimit);
+
+   return;
+
+} /* End of BCAMP_MN_SetHotLimitCC() */
+
+
+void  BCAMP_MN_ProcessTemperatureData(const bcamp_io_temp_data_t *Msg)
+{
+   /* Update temperature value */
+   Bcamp_MN_AppData.iPrevTempVal = Bcamp_MN_AppData.iTempVal;
+   Bcamp_MN_AppData.iTempVal = Msg->iTempValue;
+
+   /* Determine if it's increasing, decreasing or no change*/
+   Bcamp_MN_AppData.sDirection = TEMP_NOCHANGE;
+   if (Bcamp_MN_AppData.iTempVal > Bcamp_MN_AppData.iPrevTempVal)
+   {
+      Bcamp_MN_AppData.sDirection = TEMP_INCREASING;
+   }
+   else if (Bcamp_MN_AppData.iTempVal < Bcamp_MN_AppData.iPrevTempVal)
+   {
+      Bcamp_MN_AppData.sDirection = TEMP_DECREASING;
+   }
+
+   /* Determine its range */
+   Bcamp_MN_AppData.sRange = TEMP_NOMINAL;
+   if (Bcamp_MN_AppData.iTempVal >= Bcamp_MN_AppData.iHotLimit)
+   {
+      Bcamp_MN_AppData.sRange = TEMP_HOT;
+   }
+   else if (Bcamp_MN_AppData.iTempVal <= Bcamp_MN_AppData.iColdLimit)
+   {
+      Bcamp_MN_AppData.sRange = TEMP_COLD;
+   }
+
+   {
+       /*
+        * Create and use a temporary structure to ensure type alignment
+        */
+       union {
+          CFE_SB_Msg_t attr1;
+          bcamp_io_temp_data_t attr2;
+       } tempMessage;
+
+       memcpy(&tempMessage, Msg, sizeof(tempMessage));
+
+       CFE_EVS_SendEvent(BCAMP_MN_PROCESS_TEMP_DATA_INF_EID, CFE_EVS_INFORMATION,
+                         "BCAMP_MN - Recvd PROCESS_TEMPERATURE_DATA msg (%d) - %d",
+                         (int)CFE_SB_GetCmdCode((CFE_SB_MsgPtr_t)&tempMessage), (int)Msg->iTempValue);
+       /*
+        * Not caopying back into the original message because the const qualifier makes
+        * it uncessary
+        */
+       //memcpy(Msg, &tempMessage, sizeof(tempMessage));
+   }
+
+
+
+   return;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*                                                                            */
 /* BCAMP_MN_VerifyCmdLength() -- Verify command packet length                */
@@ -425,30 +563,3 @@ bool BCAMP_MN_VerifyCmdLength( CFE_SB_MsgPtr_t Msg, uint16 ExpectedLength )
     return( result );
 
 } /* End of BCAMP_MN_VerifyCmdLength() */
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-/*                                                                 */
-/* BCAMP_MN_GetCrc -- Output CRC                                  */
-/*                                                                 */
-/*                                                                 */
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-void BCAMP_MN_GetCrc( const char *TableName )
-{
-    int32           status;
-    uint32          Crc;
-    CFE_TBL_Info_t  TblInfoPtr;
-
-    status = CFE_TBL_GetInfo(&TblInfoPtr, TableName);
-    if (status != CFE_SUCCESS)
-    {
-        CFE_ES_WriteToSysLog("Bcamp_MN App: Error Getting Table Info");
-    }
-    else
-    {
-        Crc = TblInfoPtr.Crc;
-        CFE_ES_WriteToSysLog("Bcamp_MN App: CRC: 0x%08lX\n\n", (unsigned long)Crc);
-    }
-
-    return;
-
-} /* End of BCAMP_MN_GetCrc */

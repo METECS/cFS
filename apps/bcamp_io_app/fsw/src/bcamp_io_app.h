@@ -13,6 +13,7 @@
 #include "bcamp_io_app_perfids.h"
 #include "bcamp_io_app_msgids.h"
 #include "bcamp_io_app_msg.h"
+#include "bcamp_io_app_public_msg.h"
 
 /***********************************************************************/
 #define BCAMP_IO_PIPE_DEPTH                     32 /* Depth of the Command Pipe for Application */
@@ -37,6 +38,11 @@ typedef struct
     bcamp_io_hk_tlm_t    BCAMP_IO_HkTelemetryPkt;
 
     /*
+    ** Temperature data packet...
+    */
+    bcamp_io_temp_data_t BCAMP_IO_TemperatureDataPkt;
+
+    /*
     ** Run Status variable used in the main processing loop
     */
     uint32 RunStatus;
@@ -55,6 +61,11 @@ typedef struct
 
     CFE_EVS_BinFilter_t  BCAMP_IO_EventFilters[BCAMP_IO_EVENT_COUNTS];
 
+    /*
+    ** Variables to hold the simulated temperature
+    */
+    int32  iCurTempVal;    /* Stores current temperature value */
+    int32  iDeltaVal;      /* Used to compute new temperature value */
 } Bcamp_IO_AppData_t;
 
 /****************************************************************************/
@@ -72,7 +83,8 @@ void  BCAMP_IO_ReportHousekeeping(const CCSDS_CommandPacket_t *Msg);
 void  BCAMP_IO_ResetCounters(const BCAMP_IO_ResetCounters_t *Msg);
 void  BCAMP_IO_ProcessCC(const BCAMP_IO_Process_t *Msg);
 void  BCAMP_IO_NoopCmd(const BCAMP_IO_Noop_t *Msg);
-void  BCAMP_IO_GetCrc(const char *TableName);
+void  BCAMP_IO_SetCurrentTempCC(const BCAMP_IO_SetCurrentTemp_t *Msg);
+void  BCAMP_IO_SetDeltaValueCC(const BCAMP_IO_SetDeltaValue_t *Msg);
 
 bool  BCAMP_IO_VerifyCmdLength(CFE_SB_MsgPtr_t Msg, uint16 ExpectedLength);
 

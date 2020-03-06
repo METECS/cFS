@@ -14,6 +14,19 @@
 #include "bcamp_mn_app_msgids.h"
 #include "bcamp_mn_app_msg.h"
 
+#include "bcamp_io_app_public_msg.h"
+
+/*
+** Constants used for TEMP_MON data
+*/
+#define TEMP_NOCHANGE    0  /* Temperature direction, 1 of 3 */
+#define TEMP_INCREASING  1  /* Temperature direction, 2 of 3 */
+#define TEMP_DECREASING  2  /* Temperature direction, 3 of 3 */
+
+#define TEMP_NOMINAL  0  /* Temperature range, 1 of 3 */
+#define TEMP_HOT      1  /* Temperature range, 2 of 3 */
+#define TEMP_COLD     2  /* Temperature range, 3 of 3 */ 
+
 /***********************************************************************/
 #define BCAMP_MN_PIPE_DEPTH                     32 /* Depth of the Command Pipe for Application */
 
@@ -55,6 +68,17 @@ typedef struct
 
     CFE_EVS_BinFilter_t  BCAMP_MN_EventFilters[BCAMP_MN_EVENT_COUNTS];
 
+    /*
+    ** Variables to hold the temperature state
+    */
+    int32  iPrevTempVal;  /* Previous temperature value published by bcamp_io */
+    int32  iTempVal;      /* Current temperature value published by bcamp_io */
+    int32  iColdLimit;    /* Current threshold for cold temperature range */
+    int32  iHotLimit;     /* Current threshold for hot temperature range */
+    int16  sDirection;    /* Current temperature direction:
+                               TEMP_NOCHANGE, TEMP_INCREASING, or TEMP_DECREASING */
+    int16  sRange;        /* Current temperature range:
+                               TEMP_NOMINAL, TEMP_HOT, or TEMP_COLD */ 
 } Bcamp_MN_AppData_t;
 
 /****************************************************************************/
@@ -72,9 +96,9 @@ void  BCAMP_MN_ReportHousekeeping(const CCSDS_CommandPacket_t *Msg);
 void  BCAMP_MN_ResetCounters(const BCAMP_MN_ResetCounters_t *Msg);
 void  BCAMP_MN_ProcessCC(const BCAMP_MN_Process_t *Msg);
 void  BCAMP_MN_NoopCmd(const BCAMP_MN_Noop_t *Msg);
-void  BCAMP_MN_GetCrc(const char *TableName);
-
-int32 BCAMP_MN_TblValidationFunc(void *TblData);
+void  BCAMP_MN_SetColdLimitCC(const BCAMP_MN_SetColdLimit_t *Msg);
+void  BCAMP_MN_SetHotLimitCC(const BCAMP_MN_SetHotLimit_t *Msg);
+void  BCAMP_MN_ProcessTemperatureData(const bcamp_io_temp_data_t *Msg);
 
 bool  BCAMP_MN_VerifyCmdLength(CFE_SB_MsgPtr_t Msg, uint16 ExpectedLength);
 

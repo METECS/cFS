@@ -97,6 +97,12 @@ int32 BCAMP_IO_AppInit( void )
     Bcamp_IO_AppData.RunStatus = CFE_ES_APP_RUN;
 
     /*
+    ** Initialize temperature tracking values
+    */
+    Bcamp_IO_AppData.iCurTempVal = 0;
+    Bcamp_IO_AppData.iDeltaVal = 1; 
+
+    /*
     ** Initialize app command execution counters
     */
     Bcamp_IO_AppData.CmdCounter = 0;
@@ -126,6 +132,12 @@ int32 BCAMP_IO_AppInit( void )
     Bcamp_IO_AppData.BCAMP_IO_EventFilters[5].Mask    = 0x0000;
     Bcamp_IO_AppData.BCAMP_IO_EventFilters[6].EventID = BCAMP_IO_PIPE_ERR_EID;
     Bcamp_IO_AppData.BCAMP_IO_EventFilters[6].Mask    = 0x0000;
+    Bcamp_IO_AppData.BCAMP_IO_EventFilters[7].EventID = BCAMP_IO_COMMANDSETTEMP_INF_EID;
+    Bcamp_IO_AppData.BCAMP_IO_EventFilters[7].Mask    = 0x0000;
+    Bcamp_IO_AppData.BCAMP_IO_EventFilters[8].EventID = BCAMP_IO_COMMANDSETDELTA_INF_EID;
+    Bcamp_IO_AppData.BCAMP_IO_EventFilters[8].Mask    = 0x0000;
+    Bcamp_IO_AppData.BCAMP_IO_EventFilters[9].EventID = BCAMP_IO_COMMANDPROC_INF_EID;
+    Bcamp_IO_AppData.BCAMP_IO_EventFilters[9].Mask    = 0x0000;
 
     /*
     ** Register the events
@@ -146,6 +158,14 @@ int32 BCAMP_IO_AppInit( void )
     CFE_SB_InitMsg(&Bcamp_IO_AppData.BCAMP_IO_HkTelemetryPkt,
                    BCAMP_IO_APP_HK_TLM_MID,
                    sizeof(bcamp_io_hk_tlm_t),
+                   true);
+
+    /*
+    ** Initialize temperature data packet (clear user data area).
+    */
+    CFE_SB_InitMsg(&Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt,
+                   BCAMP_IO_APP_TEMP_DATA_MID,
+                   sizeof(bcamp_io_temp_data_t),
                    true);
 
     /*
@@ -274,6 +294,22 @@ void BCAMP_IO_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
 
             break;
 
+        case BCAMP_IO_APP_SET_CURRENT_TEMP_CC:
+            if (BCAMP_IO_VerifyCmdLength(Msg, sizeof(BCAMP_IO_SetCurrentTemp_t)))
+            {
+                BCAMP_IO_SetCurrentTempCC((BCAMP_IO_SetCurrentTemp_t *)Msg);
+            }
+
+            break;
+
+        case BCAMP_IO_APP_SET_DELTA_VALUE_CC:
+            if (BCAMP_IO_VerifyCmdLength(Msg, sizeof(BCAMP_IO_SetDeltaValue_t)))
+            {
+                BCAMP_IO_SetDeltaValueCC((BCAMP_IO_SetDeltaValue_t *)Msg);
+            }
+
+            break;
+
         /* default case already found during FC vs length test */
         default:
             CFE_EVS_SendEvent(BCAMP_IO_COMMAND_ERR_EID,
@@ -386,9 +422,67 @@ void BCAMP_IO_ResetCounters( const BCAMP_IO_ResetCounters_t *Msg )
 void  BCAMP_IO_ProcessCC( const BCAMP_IO_Process_t *Msg )
 {
 
+    Bcamp_IO_AppData.iCurTempVal += Bcamp_IO_AppData.iDeltaVal;
+    Bcamp_IO_AppData.CmdCounter++;
+
+    Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt.iTempValue = Bcamp_IO_AppData.iCurTempVal;
+      
+    {
+        /*
+         * Create and use a temporary structure to ensure type alignment
+         */
+        union {
+           CFE_SB_Msg_t attr1;
+           bcamp_io_temp_data_t attr2;
+        } tempMessage;
+
+	memcpy(&tempMessage, &Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt, sizeof(tempMessage));
+
+        CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &tempMessage);
+        CFE_SB_SendMsg((CFE_SB_Msg_t *) &tempMessage);
+	
+        /*
+         * Copy the temporary message back to the original source as a good practice
+         * even if not used later
+         */
+        memcpy(&Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt, &tempMessage, sizeof(tempMessage));
+    }
+
+    CFE_EVS_SendEvent(BCAMP_IO_COMMANDPROC_INF_EID,
+                      CFE_EVS_INFORMATION,
+                      "BCAMP_IO: PROCESS command");
+
     return;
 
 } /* End of BCAMP_IO_ProcessCC */
+
+void BCAMP_IO_SetCurrentTempCC( const BCAMP_IO_SetCurrentTemp_t *Msg)
+{
+
+   Bcamp_IO_AppData.iCurTempVal = Msg->iValue;
+   Bcamp_IO_AppData.CmdCounter++;
+
+   CFE_EVS_SendEvent(BCAMP_IO_COMMANDSETTEMP_INF_EID, CFE_EVS_INFORMATION,
+                     "BCAMP_IO - Recvd SET_CURRENT_TEMP cmd (%d) - %d",
+                     (int)CFE_SB_GetCmdCode((CFE_SB_MsgPtr_t)Msg), (int)Bcamp_IO_AppData.iCurTempVal);
+
+   return;
+
+} /* End of BCAMP_IO_SetCurrentTempCC() */
+
+void BCAMP_IO_SetDeltaValueCC( const BCAMP_IO_SetDeltaValue_t *Msg)
+{
+
+   Bcamp_IO_AppData.iDeltaVal = Msg->iValue;
+   Bcamp_IO_AppData.CmdCounter++;
+
+   CFE_EVS_SendEvent(BCAMP_IO_COMMANDSETDELTA_INF_EID, CFE_EVS_INFORMATION,
+                     "BCAMP_IO - Recvd SET_DELTA_VALUE cmd (%d) - %d",
+                     (int)CFE_SB_GetCmdCode((CFE_SB_MsgPtr_t)Msg), (int)Bcamp_IO_AppData.iDeltaVal);
+
+   return;
+
+} /* End of BCAMP_IO_SetDeltaValueCC() */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*                                                                            */
@@ -425,30 +519,3 @@ bool BCAMP_IO_VerifyCmdLength( CFE_SB_MsgPtr_t Msg, uint16 ExpectedLength )
     return( result );
 
 } /* End of BCAMP_IO_VerifyCmdLength() */
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-/*                                                                 */
-/* BCAMP_IO_GetCrc -- Output CRC                                   */
-/*                                                                 */
-/*                                                                 */
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-void BCAMP_IO_GetCrc( const char *TableName )
-{
-    int32           status;
-    uint32          Crc;
-    CFE_TBL_Info_t  TblInfoPtr;
-
-    status = CFE_TBL_GetInfo(&TblInfoPtr, TableName);
-    if (status != CFE_SUCCESS)
-    {
-        CFE_ES_WriteToSysLog("Bcamp_IO App: Error Getting Table Info");
-    }
-    else
-    {
-        Crc = TblInfoPtr.Crc;
-        CFE_ES_WriteToSysLog("Bcamp_IO App: CRC: 0x%08lX\n\n", (unsigned long)Crc);
-    }
-
-    return;
-
-} /* End of BCAMP_IO_GetCrc */

@@ -10,7 +10,10 @@
 #define BCAMP_MN_INVALID_MSGID_ERR_EID          5
 #define BCAMP_MN_LEN_ERR_EID                    6
 #define BCAMP_MN_PIPE_ERR_EID                   7
+#define BCAMP_MN_COMMANDSETCOLDLIMIT_INF_EID    8
+#define BCAMP_MN_COMMANDSETHOTLIMIT_INF_EID     9
+#define BCAMP_MN_PROCESS_TEMP_DATA_INF_EID     10
 
-#define BCAMP_MN_EVENT_COUNTS                   7
+#define BCAMP_MN_EVENT_COUNTS                  10
 
 #endif /* _bcamp_mn_app_events_h_ */

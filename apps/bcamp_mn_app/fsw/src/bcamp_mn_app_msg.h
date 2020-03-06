@@ -7,6 +7,8 @@
 #define BCAMP_MN_APP_NOOP_CC                 0
 #define BCAMP_MN_APP_RESET_COUNTERS_CC       1
 #define BCAMP_MN_APP_PROCESS_CC              2
+#define BCAMP_MN_APP_SET_COLD_LIMIT_CC       3
+#define BCAMP_MN_APP_SET_HOT_LIMIT_CC        4
 
 /*************************************************************************/
 
@@ -19,6 +21,12 @@ typedef struct
 
 } BCAMP_MN_NoArgsCmd_t;
 
+typedef struct
+{
+   uint8  ucCmdHeader[CFE_SB_CMD_HDR_SIZE];
+   int32  iValue;    /* Command argument of type int32 */
+} BCAMP_MN_IntArgCmd_t;
+
 /*
 ** The following commands all share the "NoArgs" format
 **
@@ -30,6 +38,16 @@ typedef BCAMP_MN_NoArgsCmd_t      BCAMP_MN_Noop_t;
 typedef BCAMP_MN_NoArgsCmd_t      BCAMP_MN_ResetCounters_t;
 typedef BCAMP_MN_NoArgsCmd_t      BCAMP_MN_Process_t;
 
+/*
+** The following commands all share the "IntArg" format
+**
+** They are each given their own type name matching the command name, which_open_mode
+** allows them to change independently in the future without changing the prototype
+** of the handler function
+*/
+typedef BCAMP_MN_IntArgCmd_t      BCAMP_MN_SetColdLimit_t;
+typedef BCAMP_MN_IntArgCmd_t      BCAMP_MN_SetHotLimit_t;
+
 /*************************************************************************/
 /*
 ** Type definition (BCAMP_MN App housekeeping)
@@ -39,7 +57,10 @@ typedef struct
     uint8              TlmHeader[CFE_SB_TLM_HDR_SIZE];
     uint8              bcamp_mn_command_error_count;
     uint8              bcamp_mn_command_count;
-    uint8              spare[2];
+
+    int32              iTempValue;
+    int16              sTempDirection;
+    int16              sTempRange; 
 
 } OS_PACK bcamp_mn_hk_tlm_t;
 
