@@ -10,6 +10,7 @@
 #include "cfe_sb.h"
 #include "cfe_es.h"
 
+#include "bcamp_io_app_events.h"
 #include "bcamp_io_app_perfids.h"
 #include "bcamp_io_app_msgids.h"
 #include "bcamp_io_app_msg.h"
