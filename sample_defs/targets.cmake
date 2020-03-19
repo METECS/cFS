@@ -85,14 +85,14 @@ SET(FT_INSTALL_SUBDIR "host/functional-test")
 
 # Each target board can have its own HW arch selection and set of included apps
 SET(TGT1_NAME cpu1)
-SET(TGT1_APPLIST sample_app sample_lib ci_lab to_lab sch_lab bcamp_io_app bcamp_mn_app)
+SET(TGT1_APPLIST ci_lab to_lab sch_lab bcamp_io_app bcamp_mn_app)
 SET(TGT1_FILELIST cfe_es_startup.scr)
 
 # CPU2/3 are duplicates of CPU1.  These are not built by default anymore but are
 # commented out to serve as an example of how one would configure multiple cpus.
-#SET(TGT2_NAME cpu2)
-#SET(TGT2_APPLIST sample_app ci_lab to_lab sch_lab)
-#SET(TGT2_FILELIST cfe_es_startup.scr)
+SET(TGT2_NAME cpu2)
+SET(TGT2_APPLIST sample_app sample_lib ci_lab to_lab sch_lab)
+SET(TGT2_FILELIST cfe_es_startup.scr)
 
 #SET(TGT3_NAME cpu3)
 #SET(TGT3_APPLIST sample_app ci_lab to_lab sch_lab)
