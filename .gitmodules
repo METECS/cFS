@@ -1,44 +1,44 @@
 [submodule "cfe"]
 	path = cfe
-	url = https://github.com/nasa/cFE.git
-	branch = master
+	url = https://github.com/metecs/cFE.git
+	branch = 3356da650f04b60190642be3efece47afa66b61a
 [submodule "osal"]
 	path = osal
-	url = https://github.com/nasa/osal.git
-	branch = master
+	url = https://github.com/metecs/osal.git
+	branch = 8239eb5b521fdac68a09973e8e5ce6eb4a251e90
 [submodule "psp"]
 	path = psp
-	url = https://github.com/nasa/PSP.git
-        branch = master
+	url = https://github.com/metecs/PSP.git
+        branch = 91e209def67fc8a8f2e78691cd841165ca782e0c
 [submodule "apps/ci_lab"]
 	path = apps/ci_lab
-	url = https://github.com/nasa/ci_lab.git
-        branch = master
+	url = https://github.com/metecs/ci_lab.git
+        branch = 63e116f49f4b69d1ab3ac38be83d126d6c4e9d90
 [submodule "apps/sample_app"]
 	path = apps/sample_app
-	url = https://github.com/nasa/sample_app.git
-        branch = master
+	url = https://github.com/metecs/sample_app.git
+        branch = 0e2a8d6515ca8064f55ca0c33e0210e7c2efedc3
 [submodule "apps/sample_lib"]
 	path = apps/sample_lib
-	url = https://github.com/nasa/sample_lib.git
-        branch = master
+	url = https://github.com/metecs/sample_lib.git
+        branch = df3dd7e6ec4708c594471bf5f9a358010328767a
 [submodule "apps/sch_lab"]
 	path = apps/sch_lab
-	url = https://github.com/nasa/sch_lab.git
-        branch = master
+	url = https://github.com/metecs/sch_lab.git
+        branch = a4b20e95d4ba312395c458911c9b918a1281dd3c
 [submodule "apps/to_lab"]
 	path = apps/to_lab
-	url = https://github.com/nasa/to_lab.git
-        branch = master
+	url = https://github.com/metecs/to_lab.git
+        branch = 388c39fd9b648f16daa0c48636f4a1c489f60a17
 [submodule "tools/cFS-GroundSystem"]
 	path = tools/cFS-GroundSystem
-	url = https://github.com/nasa/cFS-GroundSystem.git
-        branch = master
+	url = https://github.com/metecs/cFS-GroundSystem.git
+        branch = 9a4a16d88f1d7d22a8300d22130894028f5e19a9
 [submodule "tools/elf2cfetbl"]
 	path = tools/elf2cfetbl
-	url = https://github.com/nasa/elf2cfetbl.git
-        branch = master
+	url = https://github.com/metecs/elf2cfetbl.git
+        branch = 21ea90f12d85b164826c4ab59522f26dd016d716
 [submodule "tools/tblCRCTool"]
 	path = tools/tblCRCTool
-	url = https://github.com/nasa/tblCRCTool.git
-        branch = master
+	url = https://github.com/metecs/tblCRCTool.git
+        branch = d61efe6ab69626633786d7cee6b2b30089fe52d8
