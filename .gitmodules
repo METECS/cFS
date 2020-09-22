@@ -1,7 +1,7 @@
 [submodule "cfe"]
 	path = cfe
 	url = https://github.com/metecs/cFE.git
-	branch = 3356da650f04b60190642be3efece47afa66b61a
+	branch = 94442c2fd01064ab3221463a0fb7a95fc34ad08a
 [submodule "osal"]
 	path = osal
 	url = https://github.com/metecs/osal.git
@@ -13,11 +13,11 @@
 [submodule "apps/ci_lab"]
 	path = apps/ci_lab
 	url = https://github.com/metecs/ci_lab.git
-        branch = 63e116f49f4b69d1ab3ac38be83d126d6c4e9d90
+        branch = 84f7d07a8007b4299c75cda643335cb38d200926
 [submodule "apps/sample_app"]
 	path = apps/sample_app
 	url = https://github.com/metecs/sample_app.git
-        branch = 0e2a8d6515ca8064f55ca0c33e0210e7c2efedc3
+        branch = 46db0fbdeb3a06db9bbb32187dd41a92a0e3cd13
 [submodule "apps/sample_lib"]
 	path = apps/sample_lib
 	url = https://github.com/metecs/sample_lib.git
@@ -25,19 +25,19 @@
 [submodule "apps/sch_lab"]
 	path = apps/sch_lab
 	url = https://github.com/metecs/sch_lab.git
-        branch = a4b20e95d4ba312395c458911c9b918a1281dd3c
+        branch = 36367a1bd158eff33759da36b76cb97313e3d4a5
 [submodule "apps/to_lab"]
 	path = apps/to_lab
 	url = https://github.com/metecs/to_lab.git
-        branch = 388c39fd9b648f16daa0c48636f4a1c489f60a17
+        branch = 450364d54e672f6928c232c6ef3b39aa0d6502d9
 [submodule "tools/cFS-GroundSystem"]
 	path = tools/cFS-GroundSystem
 	url = https://github.com/metecs/cFS-GroundSystem.git
-        branch = 9a4a16d88f1d7d22a8300d22130894028f5e19a9
+        branch = df99b0d8f7f3d258c7d73a03df0832eaf8c55f80
 [submodule "tools/elf2cfetbl"]
 	path = tools/elf2cfetbl
 	url = https://github.com/metecs/elf2cfetbl.git
-        branch = 21ea90f12d85b164826c4ab59522f26dd016d716
+        branch = 3dc2a61f7d44bade7e00e57afe1f4c80381395d7
 [submodule "tools/tblCRCTool"]
 	path = tools/tblCRCTool
 	url = https://github.com/metecs/tblCRCTool.git
