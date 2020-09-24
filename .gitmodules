@@ -25,15 +25,15 @@
 [submodule "apps/sch_lab"]
 	path = apps/sch_lab
 	url = https://github.com/metecs/sch_lab.git
-        branch = 36367a1bd158eff33759da36b76cb97313e3d4a5
+        branch = 2797196dc46206caf09aecc799cc0d3deba5d36a
 [submodule "apps/to_lab"]
 	path = apps/to_lab
 	url = https://github.com/metecs/to_lab.git
-        branch = 450364d54e672f6928c232c6ef3b39aa0d6502d9
+        branch = a307084eaff7abd4631db2c053ae66db453a251a
 [submodule "tools/cFS-GroundSystem"]
 	path = tools/cFS-GroundSystem
 	url = https://github.com/metecs/cFS-GroundSystem.git
-        branch = df99b0d8f7f3d258c7d73a03df0832eaf8c55f80
+        branch = b9d4de03df7e3075b928ceff320e1a3eee76852b
 [submodule "tools/elf2cfetbl"]
 	path = tools/elf2cfetbl
 	url = https://github.com/metecs/elf2cfetbl.git
