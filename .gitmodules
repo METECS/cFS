@@ -1,7 +1,7 @@
 [submodule "cfe"]
 	path = cfe
 	url = https://github.com/metecs/cFE.git
-	branch = 94442c2fd01064ab3221463a0fb7a95fc34ad08a
+	branch = 0c3e9e0b33c55c4aef6de359eb7939aacbe93458
 [submodule "osal"]
 	path = osal
 	url = https://github.com/metecs/osal.git
