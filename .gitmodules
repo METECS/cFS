@@ -42,3 +42,6 @@
 	path = tools/tblCRCTool
 	url = https://github.com/metecs/tblCRCTool.git
         branch = d61efe6ab69626633786d7cee6b2b30089fe52d8
+[submodule "CCDD"]
+	path = CCDD
+	url = https://github.com/METECS/CCDD.git
