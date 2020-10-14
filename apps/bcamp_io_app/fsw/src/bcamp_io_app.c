@@ -12,6 +12,11 @@
 */
 Bcamp_IO_AppData_t Bcamp_IO_AppData;
 
+/*
+** static functions
+*/
+static void BCAMP_IO_UpdateTemperature(void);
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * *  * * * * **/
 /* BCAMP_IO_AppMain() -- Application entry point and main process loop        */
 /*                                                                            */
@@ -206,6 +211,19 @@ int32 BCAMP_IO_AppInit( void )
         return ( status );
     }
 
+    /*
+    ** Subscribe to wakeup command packets
+    */
+    status = CFE_SB_Subscribe(BCAMP_IO_APP_WAKEUP_MID,
+                              Bcamp_IO_AppData.BCAMP_IO_CommandPipe);
+    if (status != CFE_SUCCESS )
+    {
+        CFE_ES_WriteToSysLog("Bcamp_IO App: Error Subscribing to Wakeup, RC = 0x%08lX\n",
+                             (unsigned long)status);
+
+        return ( status );
+    }
+
     CFE_EVS_SendEvent (BCAMP_IO_STARTUP_INF_EID,
                        CFE_EVS_INFORMATION,
                        "BCAMP_IO App Initialized. Version %d.%d.%d.%d",
@@ -240,6 +258,10 @@ void BCAMP_IO_ProcessCommandPacket( CFE_SB_MsgPtr_t Msg )
 
         case BCAMP_IO_APP_SEND_HK_MID:
             BCAMP_IO_ReportHousekeeping((CCSDS_CommandPacket_t *)Msg);
+            break;
+
+	case BCAMP_IO_APP_WAKEUP_MID:
+            BCAMP_IO_UpdateTemperature();
             break;
 
         default:
@@ -395,6 +417,24 @@ void BCAMP_IO_ResetCounters( const BCAMP_IO_ResetCounters_t *Msg )
 } /* End of BCAMP_IO_ResetCounters() */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+/*  Name:  BCAMP_IO_UpdateTemperature                                         */
+/*                                                                            */
+/*  Purpose:                                                                  */
+/*         This function updates the temperature                              */
+/*                                                                            */
+/* * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * *  * *  * * * * */
+void BCAMP_IO_UpdateTemperature()
+{
+    Bcamp_IO_AppData.iCurTempVal += Bcamp_IO_AppData.iDeltaVal;
+    Bcamp_IO_AppData.CmdCounter++;
+
+    Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt.iTempValue = Bcamp_IO_AppData.iCurTempVal;
+
+    CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt);
+    CFE_SB_SendMsg((CFE_SB_Msg_t *) &Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt);
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*  Name:  BCAMP_IO_ProcessCC                                                 */
 /*                                                                            */
 /*  Purpose:                                                                  */
@@ -404,13 +444,7 @@ void BCAMP_IO_ResetCounters( const BCAMP_IO_ResetCounters_t *Msg )
 void  BCAMP_IO_ProcessCC( const BCAMP_IO_Process_t *Msg )
 {
 
-    Bcamp_IO_AppData.iCurTempVal += Bcamp_IO_AppData.iDeltaVal;
-    Bcamp_IO_AppData.CmdCounter++;
-
-    Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt.iTempValue = Bcamp_IO_AppData.iCurTempVal;
-
-    CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt);
-    CFE_SB_SendMsg((CFE_SB_Msg_t *) &Bcamp_IO_AppData.BCAMP_IO_TemperatureDataPkt);
+    BCAMP_IO_UpdateTemperature();
       
     CFE_EVS_SendEvent(BCAMP_IO_COMMANDPROC_INF_EID,
                       CFE_EVS_INFORMATION,
