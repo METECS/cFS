@@ -45,3 +45,6 @@
 [submodule "CCDD"]
 	path = CCDD
 	url = https://github.com/METECS/CCDD.git
+[submodule "3rdparty/serbus"]
+	path = 3rdparty/serbus
+	url = https://github.com/METECS/serbus.git
